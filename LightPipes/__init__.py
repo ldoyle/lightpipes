@@ -61,10 +61,7 @@ LP = Init() # noqa
 for name in __all__:
     locals()[name] = getattr(LP, name)
 
-# define some units
-m = 1.0;mm=1e-3*m; cm=1e-2*m;um=1e-6*m;nm=1e-9*m
-rad=1.0;mrad=1e-3*rad
-W = 1.0;mW = 1e-3*W
+from .units import * # noqa
 
 __all__.extend([
     'm', 'cm', 'mm', 'um', 'nm',
