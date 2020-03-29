@@ -89,7 +89,7 @@ from .core import BeamMix
 from .core import MultIntensity, MultPhase
 from .core import Normal, Power
 from .core import IntAttenuator
-from .misc import Tilt
+from .misc import Tilt, Gain
 
 def _apply_vals_to_LP(Fin):
     """Apply the values stored in Field to LP instance.
@@ -236,46 +236,6 @@ def Forvard(z, Fin):
     """
     return _LP.Forvard(z, Fin)
 
-@accept_new_field 
-def Gain(Isat, alpha0, Lgain, Fin):
-    """
-    Fout = Gain(Isat, alpha0, Lgain, Fin)
-
-    :ref:`Propagates the field through a thin saturable gain sheet. <Gain>`
-        
-        :math:`F_{out}(x,y) = F_{in}(x,y) e^{\\alpha L_{gain}}`, with
-        :math:`\\alpha = \\dfrac{\\alpha_0}{1 + {2 I(x,y)}/{I_{sat}}}`.
-         
-        :math:`2\\alpha L_{gain}` is the net round-trip intensity gain. 
-        :math:`\\alpha_0` is the small-signal intensity gain and 
-        :math:`I_{sat}` is the saturation intensity of the gain medium 
-        with a length :math:`L_{gain}`.
-        
-        The intensity must be doubled because of the left- and right 
-        propagating fields in a normal resonator. (If only one field is propagating in one direction (ring 
-        laser) you should double :math:`I_{sat}` as well to remove the factor 2 in the denominator).
-
-        The gain sheet should be at one of the mirrors of a (un)stable laser resonator.
-        
-        See: Rensch and Chester (1973).
-        
-    Args::
-    
-        Isat: saturation intensity
-        alpha0: small signal gain
-        Lgain: length of the gain sheet
-        Fin: input field
-        
-    Returns::
-     
-        Fout: output field (N x N square array of complex numbers).
-
-    Example:
-    
-    :ref:`Unstable resonator <Unstab>`
-
-    """
-    return _LP.Gain(Isat, alpha0, Lgain, Fin)
 
 @accept_new_field
 def GaussAperture(w, x_shift, y_shift, T, Fin):
