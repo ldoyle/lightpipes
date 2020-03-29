@@ -80,7 +80,7 @@ from .propagators import Fresnel
 from .lenses import LensFarfield
 from .zernike import ZernikeName, ZernikeNolltoMN, noll_to_zern, \
     ZernikeFilter, ZernikeFit, Zernike
-from .core import CircAperture, CircScreen
+from .core import CircAperture, CircScreen, RectAperture, RectScreen
 from .core import Intensity, Phase, PhaseUnwrap
 from .core import RandomIntensity, RandomPhase
 from .core import Strehl
@@ -88,6 +88,7 @@ from .core import SubIntensity, SubPhase
 from .core import BeamMix
 from .core import MultIntensity, MultPhase
 from .core import Normal, Power
+from .core import IntAttenuator
 
 def _apply_vals_to_LP(Fin):
     """Apply the values stored in Field to LP instance.
@@ -403,26 +404,6 @@ def GaussLaguerre(p, m, A, w0, Fin):
         
     return _LP.GaussLaguerre( p, m, A, w0, Fin)
 
-@accept_new_field
-def IntAttenuator(att, Fin):
-    """
-    Fout = IntAttenuator(att, Fin)
-    
-    :ref:`Attenuates the intensity of the field. <IntAttenuator>`
-        
-        :math:`F_{out}(x,y)=\\sqrt{att}F_{in}(x,y)`
-        
-    Args::
-    
-        att: intensity attenuation factor
-        Fin: input field
-        
-    Returns::
-    
-        Fout: output field (N x N square array of complex numbers).
-   
-    """    
-    return _LP.IntAttenuator( att, Fin)
 
 @accept_new_field            
 def Interpol(new_size, new_number, x_shift, y_shift, angle, magnif, Fin):
@@ -538,52 +519,6 @@ def PipFFT(index, Fin):
     """
     return _LP.PipFFT(index, Fin)
 
-
-@accept_new_field          
-def RectAperture(sx, sy, x_shift, y_shift, angle, Fin):
-    """
-    Fout = RectAperture(w, h, x_shift, y_shift, angle, Fin)
-    
-    :ref:`Propagates the field through a rectangular aperture. <RectAperture>`
-
-    Args::
-    
-        w: width of the aperture
-        h: height of the aperture
-        x_shift, y_shift: shift from the center
-        angle: rotation angle in degrees 
-        Fin: input field
-        
-    Returns::
-     
-        Fout: output field (N x N square array of complex numbers).
-
-    """
-    #TODO angle=0 already done in Python, see .core, needs finishing
-    return _LP.RectAperture(sx, sy, x_shift, y_shift, angle, Fin)
-
-@accept_new_field
-def RectScreen(sx, sy, x_shift, y_shift, angle, Fin):
-    """
-    Fout = RectScreen(w, h, x_shift, y_shift, angle, Fin)
-    
-    :ref:`Diffracts the field by a rectangular screen. <RectScreen>`
-
-    Args::
-    
-        w: width of the screen
-        h: height of the screen
-        x_shift, y_shift: shift from the center
-        angle: rotation angle in degrees 
-        Fin: input field
-        
-    Returns::
-     
-        Fout: output field (N x N square array of complex numbers).
-
-    """
-    #TODO angle=0 already done in Python, see .core, needs finishing
-    return _LP.RectScreen(sx, sy, x_shift, y_shift, angle, Fin)
 
 @accept_new_field
 def Steps(z, nstep, refr, Fin):

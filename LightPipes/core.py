@@ -7,6 +7,7 @@ if USE_SCIPY:
     from skimage.restoration import unwrap_phase as _unwrap_phase
     #used in PhaseUnwrap, or using own implementation in .unwrap
 
+from .units import deg
 from .field import Field
 from .unwrap import phaseunwrap
 
@@ -105,6 +106,30 @@ def CircScreen(R, x_shift, y_shift, Fin):
     dist_sq = X**2 + Y**2 #squared, no need for sqrt
     
     Fout.field[dist_sq <= R**2] = 0.0
+    return Fout
+
+
+def IntAttenuator(att, Fin):
+    """
+    Fout = IntAttenuator(att, Fin)
+    
+    :ref:`Attenuates the intensity of the field. <IntAttenuator>`
+        
+        :math:`F_{out}(x,y)=\\sqrt{att}F_{in}(x,y)`
+        
+    Args::
+    
+        att: intensity attenuation factor
+        Fin: input field
+        
+    Returns::
+    
+        Fout: output field (N x N square array of complex numbers).
+   
+    """
+    Efactor = _np.sqrt(att) #att. given as intensity
+    Fout = Field.copy(Fin)
+    Fout.field *= Efactor
     return Fout
 
 def Intensity(flag, Fin):
@@ -376,37 +401,21 @@ def RectAperture(sx, sy, x_shift, y_shift, angle, Fin):
 
     """
     Fout = Field.copy(Fin)
-    # return self.thisptr.RectAperture(sx, sy, x_shift, y_shift, angle, Fin)
-    """CPP
-        double dx,x,y,x0,y0,cc,ss;
-        int i2;
-        dx =size/N;
-        i2=N/2+1;
-        angle *= -Pi/180.;
-        cc=cos(angle);
-        ss=sin(angle);
-    """
-    if angle==0.0:
-        yy, xx = Fout.mgrid_cartesian
-        matchx = _np.abs(xx-x_shift) > sx/2
-        matchy = _np.abs(yy-y_shift) > sy/2
-        Fout.field[matchx | matchy] = 0.0
-    else:
-        """CPP
-            for (int i=0;i<N ;i++){
-                for (int j=0;j<N ;j++){
-                    x0=(i-i2+1)*dx-x_shift;
-                    y0=(j-i2+1)*dx-y_shift;
-                    x=x0*cc+y0*ss;
-                    y=-x0*ss+y0*cc; 
-                    if(fabs(x) > sx/2. || fabs(y) > sy/2. ){
-                        Field.at(i).at(j) = 0.0;
-                    }
-                }
-            }
-        """
-        raise NotImplementedError('Currently only angle=0.0 allowed')
+    yy, xx = Fout.mgrid_cartesian
+    yy = yy - y_shift
+    xx = xx - x_shift
+    if angle!=0.0:
+        ang_rad = -1*angle*deg #-1 copied from Cpp convention
+        cc = _np.cos(ang_rad)
+        ss = _np.sin(ang_rad)
+        xxr = cc * xx + ss * yy
+        yyr = -ss * xx + cc * yy
+        yy, xx = yyr, xxr
+    matchx = _np.abs(xx) > sx/2
+    matchy = _np.abs(yy) > sy/2
+    Fout.field[matchx | matchy] = 0.0
     return Fout
+
 
 def RectScreen(sx, sy, x_shift, y_shift, angle, Fin):
     """
@@ -426,38 +435,21 @@ def RectScreen(sx, sy, x_shift, y_shift, angle, Fin):
      
         Fout: output field (N x N square array of complex numbers).
 
-    """    
-    Fout = Field.copy(Fin)
-    # return self.thisptr.RectScreen(sx, sy, x_shift, y_shift, angle, Fin)
-    """CPP
-        double dx,x,y,x0,y0,cc,ss;
-        int i2;
-        dx =size/N;
-        i2=N/2+1;
-        angle *= -Pi/180.;
-        cc=cos(angle);
-        ss=sin(angle);
     """
-    if angle==0.0:
-        yy, xx = Fout.mgrid_cartesian
-        matchx = _np.abs(xx-x_shift) <= sx/2
-        matchy = _np.abs(yy-y_shift) <= sy/2
-        Fout.field[matchx & matchy] = 0.0
-    else:
-        """
-            for (int i=0;i<N ;i++){
-                for (int j=0;j<N ;j++){
-                    x0=(i-i2+1)*dx-x_shift;
-                    y0=(j-i2+1)*dx-y_shift;
-                    x=x0*cc+y0*ss;
-                    y=-x0*ss+y0*cc; 
-                    if(fabs(x) <= sx/2. && fabs(y) <= sy/2. ) {
-                        Field.at(i).at(j) = 0.0;
-                    }
-                }
-            }
-        """
-        raise NotImplementedError('Currently only angle=0.0 allowed')
+    Fout = Field.copy(Fin)
+    yy, xx = Fout.mgrid_cartesian
+    yy = yy - y_shift
+    xx = xx - x_shift
+    if angle!=0.0:
+        ang_rad = -1*angle*deg #-1 copied from Cpp convention
+        cc = _np.cos(ang_rad)
+        ss = _np.sin(ang_rad)
+        xxr = cc * xx + ss * yy
+        yyr = -ss * xx + cc * yy
+        yy, xx = yyr, xxr
+    matchx = _np.abs(xx) <= sx/2
+    matchy = _np.abs(yy) <= sy/2
+    Fout.field[matchx & matchy] = 0.0
     return Fout
 
 
