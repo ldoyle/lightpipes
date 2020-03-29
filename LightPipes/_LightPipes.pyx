@@ -47,6 +47,11 @@ cdef extern from "lpspy.h" namespace "std":
         vector[vector[complex]] Tilt(double ,double, vector[vector[complex]])
         vector[vector[complex]] Zernike(int, int, double ,double, vector[vector[complex]])
         void test()
+        void     internal_setN(int newN)
+        int      internal_getInt1()
+        void     internal_setInt1(int newInt1)
+        double   internal_getDoub1()
+        void     internal_setDoub1(double newDoub1)
         double getGridSize()
         void setGridSize(double newGridSize)
         double getWavelength()
@@ -1052,6 +1057,16 @@ cdef class Init:
 
         """
         return self.thisptr.getGridDimension()
+    def internal_setN(self, newN):
+        self.thisptr.internal_setN(newN)
+    def internal_getInt1(self):
+        return self.thisptr.internal_getInt1()
+    def internal_setInt1(self, newInt1):
+        self.thisptr.internal_setInt1(newInt1)
+    def internal_getDoub1(self):
+        return self.thisptr.internal_getDoub1()
+    def internal_setDoub1(self, newDoub1):
+        self.thisptr.internal_setDoub1(newDoub1)
     def GaussBeam(self,size,labda,N,w,tx,ty):
         """
         F=GaussBeam(GridSize, Wavelength, N, w, tx,ty)
