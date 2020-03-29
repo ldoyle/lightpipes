@@ -3,7 +3,6 @@
 import numpy as np
 cimport numpy as np
 from libcpp.vector cimport vector
-import webbrowser
 import math
 
 cdef extern from "lpspy.h" namespace "std":
@@ -863,119 +862,11 @@ cdef class Init:
 
         """
         return self.thisptr.Zernike(n, m, R, A, Fin)
-    def noll_to_zern(self,j):
-        """
-        Convert linear Noll index to tuple of Zernike indices.
-        j is the linear Noll coordinate, n is the radial Zernike index and m is the azimuthal Zernike index.
-        @param [in] j Zernike mode Noll index
-        @return (n, m) tuple of Zernike indices
-        @see <https://oeis.org/A176988>.
-        Thanks to: Tim van Werkhoven, https://github.com/tvwerkhoven
-        """
     
-        if (j == 0):
-            print("Noll indices start at 1, 0 is invalid.")
-            return (0,0)
+    def test(self):
+        """Prints a test message to ensure extension was compiled OK."""
+        return self.thisptr.test()
     
-        n = 0
-        j1 = j-1
-        while (j1 > n):
-            n += 1
-            j1 -= n
-    
-        m = (-1)**j * ((n % 2) + 2 * int((j1+((n+1)%2)) / 2.0 ))
-        return (n, m)
-    def ZernikeNolltoMN(self,Noll):
-        MN = []
-        n = 0
-        while (Noll > n):
-            n += 1
-            Noll -= n
-        m = -n+2*Noll
-        MN=[m,n]
-        return MN
-    def ZernikeName(self,Noll):
-        if (Noll >= 1 and Noll <= 21):
-            name = [
-                "piston",
-                "horizontal tilt",
-                "vertical tilt",
-                "defocus",
-                "oblique primary astigmatism",
-                "vertical primary astigmatism",
-                "vertical coma",
-                "horizontal coma",
-                "vertical trefoil",
-                "oblique trefoil",
-                "primary spherical",
-                "vertical secondary astigmatism",
-                "oblique secondary astigmatism",
-                "vertical quadrafoil",
-                "oblique quadrafoil",
-                "horizontal secondary coma",
-                "vertical secondary coma",
-                "oblique secondary trefoil",
-                "vertical secondary trefoil",
-                "oblique pentafoil",
-                "vertical pentafoil",
-            ]
-            return name[Noll-1]
-        elif Noll < 1:
-            print( "Error in ZernikeName(Noll): argument must be larger than 1")
-            return ""
-        else:
-            return ""
-    def LPtest(self):
-        """
-        Performs a test to check if the installation of the LightPipes package was successful.
-        
-        Args::
-        
-            -
-            
-        Returns::
-        
-            "LightPipes for Python: test passed." if successful,
-            "Test failed" if not.
-    
-        """
-        Fa=[]
-        F=self.Begin(1,2,4)
-        F=self.Fresnel(10,F)
-        for i in range(0, 4):
-            for j in range(0, 4):
-                Fa.append('({0.real:2.7f} + {0.imag:2.7f}i)'.format(F[i][j]))
-        Faa=[
-        '(0.0013726 + -0.0346812i)',
-        '(0.0019701 + -0.0485514i)',
-        '(0.0019701 + -0.0485514i)',
-        '(0.0013726 + -0.0346812i)',
-        '(0.0019701 + -0.0485514i)',
-        '(0.0028259 + -0.0679688i)',
-        '(0.0028259 + -0.0679688i)',
-        '(0.0019701 + -0.0485514i)',
-        '(0.0019701 + -0.0485514i)',
-        '(0.0028259 + -0.0679688i)',
-        '(0.0028259 + -0.0679688i)',
-        '(0.0019701 + -0.0485514i)',
-        '(0.0013726 + -0.0346812i)',
-        '(0.0019701 + -0.0485514i)',
-        '(0.0019701 + -0.0485514i)',
-        '(0.0013726 + -0.0346812i)'
-        ]
-        if Fa==Faa:
-            self.thisptr.test()
-        else:
-            print('Test failed')
-
-    def LPhelp(self):
-        """
-        Go to the LightPipes documentation website on:
-        
-        https://opticspy.github.io/lightpipes/
-
-        """
-        webbrowser.open_new("https://opticspy.github.io/lightpipes/")
     def getGridSize(self):
         """
         size_grid = getGridSize()
@@ -1067,118 +958,5 @@ cdef class Init:
         return self.thisptr.internal_getDoub1()
     def internal_setDoub1(self, newDoub1):
         self.thisptr.internal_setDoub1(newDoub1)
-    def GaussBeam(self,size,labda,N,w,tx,ty):
-        """
-        F=GaussBeam(GridSize, Wavelength, N, w, tx,ty)
-        :ref:`Creates a Gaussian beam in its waist (phase = 0.0, amplitude = 1.0). <Begin>`
 
-        Args::
-        
-            GridSize: size of the grid
-            Wavelength: wavelength of the field
-            N: N x N grid points (N must be even)
-            w: size of the waist
-            tx, ty: tilt of the beam
-            
-            
-        Returns::
-         
-            F: N x N square array of complex numbers (1+0j).
-                
-        Example:
-        
-        :ref:`Diffraction from a circular aperture <Diffraction>`
-        
-        """
-        F=self.Begin(size,labda,N)
-        F=self.GaussHermite(0,0,1,w,F)
-        F=self.Tilt(tx,ty,F)
-        return F
-    def PointSource(self,size,labda,N,x,y):
-        """
-        F=PointSource(GridSize, Wavelength, N, x, y)
-        :ref:`Creates a point source. <Begin>`
-
-        Args::
-        
-            GridSize: size of the grid
-            Wavelength: wavelength of the field
-            N: N x N grid points (N must be even)
-            x, y: position of the point source.
-            
-            
-        Returns::
-         
-            F: N x N square array of complex numbers (0+0j, or 1+0j where the pointsorce is ).
-                
-        Example:
-        
-        :ref:`Diffraction from a circular aperture <Diffraction>`
-        
-        """
-        F=self.Begin(size,labda,N)
-        if abs(x) >size/2 or abs(y) > size/2:
-            print('error in PointSource: x and y must be inside grid!')
-            return F
-        F=self.IntAttenuator(0,F)
-        nx=int(N/2*(1+2*x/size))
-        ny=int(N/2*(1+2*y/size))
-        F[nx][ny]=1.0
-        return F
-    def LPdemo(self):
-        """
-        LPdemo()
-        Demonstrates the simulation of a two-holes interferometer.
-        
-        Args::
-        
-             -
-        
-        Returns::
-        
-            A plot of the interference pattern and a listing of the Python script.
-        
-        """
-        import matplotlib.pyplot as plt
-        import sys
-        import platform
-        m=1
-        mm=1e-3*m
-        cm=1e-2*m
-        um=1e-6*m
-        wavelength=20*um
-        size=30.0*mm
-        N=500
-        F=self.Begin(size,wavelength,N)
-        F1=self.CircAperture(0.15*mm, -0.6*mm,0, F)
-        F2=self.CircAperture(0.15*mm, 0.6*mm,0, F)    
-        F=self.BeamMix(F1,F2)
-        F=self.Fresnel(10*cm,F)
-        I=self.Intensity(0,F)
-        #plt.contourf(I,50); plt.axis('equal')
-        fig=plt.figure()
-        fig.canvas.set_window_title('Interference pattern of a two holes interferometer') 
-        plt.imshow(I,cmap='rainbow');plt.axis('off')
-        print(
-            '\n\nLightPipes for Python demo\n\n'
-            'Python script of a two-holes interferometer:\n\n'
-            '   import matplotlib.pyplot as plt\n'
-            '   from LightPipes import *\n'
-            '   wavelength=20*um\n'
-            '   size=30.0*mm\n'
-            '   N=500\n'
-            '   F=Begin(size,wavelength,N)\n'
-            '   F1=CircAperture(0.15*mm, -0.6*mm,0, F)\n'
-            '   F2=CircAperture(0.15*mm, 0.6*mm,0, F)\n'
-            '   F=BeamMix(F1,F2)\n'
-            '   F=Fresnel(10*cm,F)\n'
-            '   I=Intensity(0,F)\n'
-            '   fig=plt.figure()\n'
-            '   fig.canvas.set_window_title(\'Interference pattern of a two holes interferometer\')\n'
-            '   plt.imshow(I,cmap=\'rainbow\');plt.axis(\'off\')\n'
-            '   plt.show()\n\n'
-        )
-        print('Executed with python version: ' + sys.version)
-        print('on a ' + platform.system() + ' ' + platform.release() + ' ' + platform.machine() +' machine')
-        plt.show()
 

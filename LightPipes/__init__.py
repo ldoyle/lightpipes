@@ -1085,7 +1085,7 @@ def LPtest():
     f_ll = F.field.tolist()
     for i in range(0, 4):
         for j in range(0, 4):
-            Fa.append('({0.real:2.7f} + {0.imag:2.7f}i)'.format(F[i][j]))
+            Fa.append('({0.real:2.7f} + {0.imag:2.7f}i)'.format(f_ll[i][j]))
     Faa=[
     '(0.0013726 + -0.0346812i)',
     '(0.0019701 + -0.0485514i)',
