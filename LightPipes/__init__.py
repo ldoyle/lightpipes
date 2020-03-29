@@ -89,7 +89,7 @@ from .core import BeamMix
 from .core import MultIntensity, MultPhase
 from .core import Normal, Power
 from .core import IntAttenuator
-from .misc import Tilt, Gain
+from .misc import Tilt, Gain, PipFFT
 
 def _apply_vals_to_LP(Fin):
     """Apply the values stored in Field to LP instance.
@@ -412,26 +412,6 @@ def LensFresnel(f, z, Fin):
         
     """
     return _LP.LensFresnel(f, z, Fin)
-
-
-@accept_new_field
-def PipFFT(index, Fin):
-    """
-    Fout = PipFFT(index, Fin)
-
-    :ref:`Performs a 2D Fourier transform of the field. <PipFFT>`
-        
-    Args::
-        
-        index: +1 = forward transform, -1 = back transform
-        Fin: input field
-        
-    Returns::
-        
-        Fout: output field (N x N square array of complex numbers).
-  
-    """
-    return _LP.PipFFT(index, Fin)
 
 
 @accept_new_field

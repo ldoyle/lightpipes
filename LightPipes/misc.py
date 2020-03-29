@@ -67,6 +67,74 @@ def Gain(Isat, alpha0, Lgain, Fin):
     return Fout
 
 
+def PipFFT(index, Fin):
+    """
+    Fout = PipFFT(index, Fin)
+
+    :ref:`Performs a 2D Fourier transform of the field. <PipFFT>`
+        
+    Args::
+        
+        index: +1 = forward transform, -1 = back transform
+        Fin: input field
+        
+    Returns::
+        
+        Fout: output field (N x N square array of complex numbers).
+  
+    """
+    Fout = Field.copy(Fin)
+    legacy = False
+    if legacy:
+        """Tested to give same results as Cpp version.
+        However, viewing the Phase and Intensity in the FFT-plane,
+        it seems the phase is wrong (high-frequency jumps).
+        The output with ifftshift() correctly applied (see below) seems
+        like a flatter phase and probably physically more accurate.
+        The multiplication might just be a little faster than the shift/roll
+        of the entire array in large-array cases, so keep this code for
+        reference:
+        """
+        ii = _np.ones(Fout.N, dtype=float)
+        ii[1::2] = -1
+        iiij = _np.outer(ii, ii)
+        Fout._int1 += index
+        if Fout._int1 != 0:
+            Fout.field *= iiij #effectively doing fftshift
+        if index==1:
+            Fout.field = _np.fft.fft2(Fout.field)
+        elif index==-1:
+            Fout.field = _np.fft.ifft2(Fout.field)
+        else:
+            raise ValueError(
+                'FFT direction index must be 1 or -1, got {}'.format(index))
+        if Fout._int1 == 0:
+            Fout.field *= iiij
+    else:
+        """Very useful comment on fftshift and ifftshift found in 
+        https://github.com/numpy/numpy/issues/13442
+        with x=real and X=fourier space:
+            x = ifft(fft(x))
+            X = fft(ifft(X))
+        and both 0-centered in middle of array:
+        ->
+        X = fftshift(fft(ifftshift(x)))  # correct magnitude and phase
+        x = fftshift(ifft(ifftshift(X)))  # correct magnitude and phase
+        X = fftshift(fft(x))  # correct magnitude but wrong phase !
+        x = fftshift(ifft(X))  # correct magnitude but wrong phase !
+        """
+        if index==1:
+            Fout.field = _np.fft.fftshift(
+                _np.fft.fft2(_np.fft.ifftshift(Fout.field)))
+        elif index==-1:
+            Fout.field = _np.fft.fftshift(
+                _np.fft.ifft2(_np.fft.ifftshift(Fout.field)))
+        else:
+            raise ValueError(
+                'FFT direction index must be 1 or -1, got {}'.format(index))
+    return Fout
+
+
 def Tilt(tx, ty, Fin):
     """
     Fout = Tilt(tx, ty, Fin)
