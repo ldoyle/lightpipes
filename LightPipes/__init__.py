@@ -87,7 +87,7 @@ from .core import Strehl
 from .core import SubIntensity, SubPhase
 from .core import BeamMix
 from .core import MultIntensity, MultPhase
-from .core import Normal
+from .core import Normal, Power
 
 def _apply_vals_to_LP(Fin):
     """Apply the values stored in Field to LP instance.
@@ -538,24 +538,6 @@ def PipFFT(index, Fin):
     """
     return _LP.PipFFT(index, Fin)
 
-def Power(Fin):
-    """
-    P = Power(Fin)
-
-    :ref:`Calculates the total power. <Power>`
-        
-    Args::
-        
-        Fin: input field
-        
-    Returns::
-        
-        P: output power (real number).
-  
-    """
-    ll_in = Fin.field.T.tolist() #transpose see @accept_new_field code
-    _apply_vals_to_LP(Fin) #important to set N in LP
-    return _LP.Power(ll_in) 
 
 @accept_new_field          
 def RectAperture(sx, sy, x_shift, y_shift, angle, Fin):

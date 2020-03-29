@@ -283,6 +283,25 @@ def PhaseUnwrap(Phi):
     return PhiU
 
 
+def Power(Fin):
+    """
+    P = Power(Fin)
+
+    :ref:`Calculates the total power. <Power>`
+        
+    Args::
+        
+        Fin: input field
+        
+    Returns::
+        
+        P: output power (real number).
+  
+    """
+    #TODO why does Normal() also sum dx**2 (==integral) while this does not??
+    I = _np.abs(Fin.field)**2
+    return I.sum()
+
 
 def RandomIntensity(seed, noise, Fin):
     """
