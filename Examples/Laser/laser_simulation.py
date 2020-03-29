@@ -102,7 +102,7 @@ def TheExample():
         top='on',         # ticks along the top edge are off
         labelbottom='off')
     ax2.grid()
-    canvas.show()
+    canvas.draw()
     #print("Execution time: --- %4.2f seconds ---" % (time.time() - start_time)) 
 
 def _quit():
