@@ -118,7 +118,8 @@ def accept_new_field(fn):
         Fin = args[-1] #all LP functions have Fin as last arg
         args = args[:-1] #strip last arg
         Fout = Field.copy(Fin)
-        ll_in = Fout.field.tolist()
+        ll_in = Fout.field.T.tolist() #transpose since numpy convention
+        # is [y,x] and LP functions mostly assume [x,y] with some exceptions
         args = list(args) #make mutable
         args.append(ll_in)
         # args = tuple(args) #back to standard
@@ -127,7 +128,7 @@ def accept_new_field(fn):
         
         ll_out = fn(*args, **kwargs)
         
-        Fout.field = np.asarray(ll_out)
+        Fout.field = np.asarray(ll_out).T #undo transpose, see above
         _field_vals_from_LP(Fout)
         
         return Fout
@@ -183,11 +184,11 @@ def BeamMix(Fin1, Fin2):
     if Fin1.field.shape != Fin2.field.shape:
         raise ValueError('Field sizes do not match')
     Fout = Field.copy(Fin1)
-    ll_in1 = Fout.field.tolist()
-    ll_in2 = Fin2.field.tolist()
+    ll_in1 = Fout.field.T.tolist() #transpose see @accept_new_field code
+    ll_in2 = Fin2.field.T.tolist()
     _apply_vals_to_LP(Fout)
     ll_out = _LP.BeamMix(ll_in1, ll_in2)
-    Fout.field = np.asarray(ll_out)
+    Fout.field = np.asarray(ll_out).T
     _field_vals_from_LP(Fout)
     
     return Fout
@@ -566,7 +567,7 @@ def MultIntensity(Intens, Fin):
     return _LP.MultIntensity( Intens, Fin)
 
 @accept_new_field
-def MultPhase(Phase, Fin):
+def MultPhase(Phi, Fin):
     """
     Fout = MultPhase(Phase, Fin)
 
@@ -582,7 +583,7 @@ def MultPhase(Phase, Fin):
         Fout: output field (N x N square array of complex numbers).
   
     """
-    return _LP.MultPhase( Phase, Fin)
+    return _LP.MultPhase( Phi, Fin)
 
 @accept_new_field
 def Normal(Fin):
@@ -636,7 +637,7 @@ def Power(Fin):
         P: output power (real number).
   
     """
-    ll_in = Fin.field.tolist()
+    ll_in = Fin.field.T.tolist() #transpose see @accept_new_field code
     _apply_vals_to_LP(Fin) #important to set N in LP
     return _LP.Power(ll_in) 
 
@@ -931,7 +932,7 @@ def PointSource(size,labda,N,x,y):
     F=IntAttenuator(0,F)
     nx=int(N/2*(1+2*x/size))
     ny=int(N/2*(1+2*y/size))
-    F.field[nx, ny] = 1.0
+    F.field[ny, nx] = 1.0
     return F
 
 def LPdemo():
