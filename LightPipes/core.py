@@ -183,6 +183,37 @@ def MultPhase(Phi, Fin):
     return Fout
 
 
+def Normal(Fin):
+    """
+    Fout = Normal(Fin)
+
+    :ref:`Normalizes the field using beam power. <Normal>`
+    
+        :math:`F_{out}(x,y)= \\frac{F_{in}(x,y)}{\\sqrt{P}}`
+        
+        with
+        
+        :math:`P=\\int\\int\\abs{F_{in}(x,y)\\right}^2 dx dy`
+    
+    Args::
+        
+        Fin: input field
+        
+    Returns::
+        
+        Fout: output field (N x N square array of complex numbers).
+  
+    """
+    Fabs = _np.abs(Fin.field)**2
+    Fabs *= Fin.dx**2
+    Ptot = Fabs.sum()
+    if Ptot == 0.0:
+        raise ValueError('Error in Normal(Fin): Zero beam power!')
+    Fout = Field.copy(Fin)
+    Fout.field *= _np.sqrt(1/Ptot)
+    return Fout
+
+
 def Phase(Fin, unwrap = False, units='rad', blank_eps=0):
     """
     Phi=Phase(Fin)
@@ -426,25 +457,6 @@ def Strehl(Fin):
         S: Strehl value (real number).
   
     """
-    # return self.thisptr.Strehl(Fin)
-    """CPP
-        double sum,sum1r,sum1i,sum1;
-    
-        sum=sum1r=sum1i=0.0;
-        for (int i=0; i< N ;i++){
-            for (int j=0;j < N ;j++){
-                sum += abs(Field.at(i).at(j));
-                sum1r += Field.at(i).at(j).real();
-                sum1i += Field.at(i).at(j).imag();
-            }
-        }
-        sum1=(sum1r*sum1r+sum1i*sum1i);
-        if (sum == 0){
-            cout<<"error in Strehl: Zero beam power"<<endl;
-            return sum;
-        }
-        return sum1/sum/sum;
-    """
     normsq = _np.abs(Fin.field).sum()**2
     if normsq == 0.0:
         raise ValueError('Error in Strehl: Zero beam power')
@@ -477,9 +489,9 @@ def SubIntensity(Intens, Fin):
     Fout.field = Efield * _np.exp(1j * phi)
     return Fout
 
-def SubPhase(Phase, Fin):
+def SubPhase(Phi, Fin):
     """
-    Fout = SubPhase(Phase, Fin)
+    Fout = SubPhase(Phi, Fin)
 
     :ref:`Substitutes  a given phase distribution in the field with. <SubPhase>`
         
@@ -493,28 +505,12 @@ def SubPhase(Phase, Fin):
         Fout: output field (N x N square array of complex numbers).
   
     """
-    # return self.thisptr.SubPhase( Phase, Fin)
-    """CPP
-        double Intens2, phi;
-        if ((int)Phase.at(0).size() != N || (int)Phase.size() != N){
-            printf( "Error in SubPhase(Phase, Fin): array 'Phase' must be square and must have %d x %d elements\n",N,N);
-            exit(1);
-        }
-        for (int i=0;i< N; i++){
-            for (int j=0;j< N; j++){
-                phi=Phase.at(j).at(i);
-                Intens2=abs(Field.at(i).at(j));
-                Field.at(i).at(j) = Intens2 * exp(_j * phi);
-            }
-        }
-        return Field;
-    """
     Fout = Field.copy(Fin)
-    Phase = _np.asarray(Phase)
-    if Phase.shape != Fin.field.shape:
+    Phi = _np.asarray(Phi)
+    if Phi.shape != Fin.field.shape:
         raise ValueError('Phase map has wrong shape')
     oldabs = _np.abs(Fout.field)
-    Fout.field = oldabs * _np.exp(1j * Phase)
+    Fout.field = oldabs * _np.exp(1j * Phi)
     return Fout
 
 

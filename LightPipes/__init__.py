@@ -87,6 +87,7 @@ from .core import Strehl
 from .core import SubIntensity, SubPhase
 from .core import BeamMix
 from .core import MultIntensity, MultPhase
+from .core import Normal
 
 def _apply_vals_to_LP(Fin):
     """Apply the values stored in Field to LP instance.
@@ -517,23 +518,6 @@ def LensFresnel(f, z, Fin):
     """
     return _LP.LensFresnel(f, z, Fin)
 
-@accept_new_field
-def Normal(Fin):
-    """
-    Fout = Normal(Fin)
-
-    :ref:`Normalizes the field. <Normal>`
-        
-    Args::
-        
-        Fin: input field
-        
-    Returns::
-        
-        Fout: output field (N x N square array of complex numbers).
-  
-    """
-    return _LP.Normal(Fin)
 
 @accept_new_field
 def PipFFT(index, Fin):
