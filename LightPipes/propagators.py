@@ -72,7 +72,7 @@ def _field_Fresnel(z, field, dx, lam):
     cokz = _np.cos(kz)
     sikz = _np.sin(kz)
     
-    legacy = False #switch on to numerically compare oldLP/new results
+    legacy = True #switch on to numerically compare oldLP/new results
     if legacy:
         siz = N*dx
         dx = siz/(N-1) #like old Cpp code, even though unlogical
