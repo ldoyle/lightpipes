@@ -393,13 +393,14 @@ def SubIntensity(Intens, Fin):
         Fout: output field (N x N square array of complex numbers).
   
     """
+    Fout = Field.copy(Fin)
     Intens = _np.asarray(Intens)
-    if Intens.shape != Fin.field.shape:
+    if Intens.shape != Fout.field.shape:
         raise ValueError('Intensity map has wrong shape')
-    phi = _np.angle(Fin.field)
+    phi = _np.angle(Fout.field)
     Efield = _np.sqrt(Intens)
-    Fin.field = Efield * _np.exp(1j * phi)
-    return Fin
+    Fout.field = Efield * _np.exp(1j * phi)
+    return Fout
 
 def SubPhase(Phase, Fin):
     """
@@ -433,11 +434,11 @@ def SubPhase(Phase, Fin):
         }
         return Field;
     """
+    Fout = Field.copy(Fin)
     Phase = _np.asarray(Phase)
     if Phase.shape != Fin.field.shape:
         raise ValueError('Phase map has wrong shape')
-    oldabs = _np.abs(Fin.field)
-    Fout = Fin
+    oldabs = _np.abs(Fout.field)
     Fout.field = oldabs * _np.exp(1j * Phase)
     return Fout
 
