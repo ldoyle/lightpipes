@@ -45,7 +45,7 @@ cdef extern from "lpspy.h" namespace "std":
         vector[vector[complex]] SubPhase(vector[vector[double]], vector[vector[complex]])
         vector[vector[complex]] Tilt(double ,double, vector[vector[complex]])
         vector[vector[complex]] Zernike(int, int, double ,double, vector[vector[complex]])
-        void test()
+        int      test()
         void     internal_setN(int newN)
         int      internal_getInt1()
         void     internal_setInt1(int newInt1)

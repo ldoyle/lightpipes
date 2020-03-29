@@ -51,7 +51,7 @@ class lpspy {
         CMPLXVEC SubPhase( vector<vector<double> > Phase, CMPLXVEC Fin );
         CMPLXVEC Tilt(double tx, double ty, CMPLXVEC Fin );
         CMPLXVEC Zernike(int n, int m, double R, double A, CMPLXVEC Fin );
-        void     test();
+        int      test();
         void     internal_setN(int newN);
         int      internal_getInt1();
         void     internal_setInt1(int newInt1);

@@ -1311,8 +1311,9 @@ CMPLXVEC lpspy::Zernike(int n, int m, double R, double A, CMPLXVEC Field ){
     }
     return Field;
 }
-void lpspy::test(){
+int lpspy::test(){
     cout << test_string << endl;
+    return 1; //1 indicates success
 }
 void lpspy::internal_setN(int newN){
     N = newN;

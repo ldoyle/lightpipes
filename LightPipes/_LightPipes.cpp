@@ -6586,7 +6586,7 @@ static PyObject *__pyx_pf_10LightPipes_11_LightPipes_4Init_78test(struct __pyx_o
  *     def getGridSize(self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_void_to_None(__pyx_v_self->thisptr->test()); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 868, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->thisptr->test()); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 868, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
