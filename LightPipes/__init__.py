@@ -1261,7 +1261,7 @@ def PointSource(size,labda,N,x,y):
     F=IntAttenuator(0,F)
     nx=int(N/2*(1+2*x/size))
     ny=int(N/2*(1+2*y/size))
-    F.field[nx, ny] = 1.0 #TODO check if nx/ny or ny/nx
+    F.field[nx, ny] = 1.0
     return F
 
 def LPdemo():
