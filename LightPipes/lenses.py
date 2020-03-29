@@ -2,6 +2,7 @@
 
 import numpy as _np
 
+from .field import Field
 
 def LensFarfield(f, Fin):
     """
@@ -46,11 +47,11 @@ def LensFarfield(f, Fin):
         --> dx = L / N = lam * f_L / (N * dx') = lam * f_L / L' 
 
     """
-    dx = Fin.dx
-    lam = Fin.lam
+    Fout = Field.copy(Fin)
+    dx = Fout.dx
+    lam = Fout.lam
     L_prime = lam * f / dx
-    focusfield = _np.fft.fftshift(_np.fft.fft2(Fin.field))
-    Fout = Fin
+    focusfield = _np.fft.fftshift(_np.fft.fft2(Fout.field))
     Fout.field = focusfield
     Fout.siz = L_prime
     return Fout
