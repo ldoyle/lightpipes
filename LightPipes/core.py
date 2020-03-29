@@ -198,7 +198,7 @@ def RandomIntensity(seed, noise, Fin):
     #TODO implementation error in original LP: field error, not I error!
     # need to sqrt for that
     Fout = Field.copy(Fin)
-    _np.random.seed(seed)
+    _np.random.seed(int(seed))
     N = Fout.N
     ranint = _np.random.rand(N, N)*noise
     Fout.field += ranint
@@ -224,7 +224,7 @@ def RandomPhase(seed, maxPhase, Fin):
     #2020023 - ldo - tested similar result as Cpp version, although not 
     # 1:1 since seed is different in numpy
     Fout = Field.copy(Fin)
-    _np.random.seed(seed)
+    _np.random.seed(int(seed))
     N = Fout.N
     ranphase = (_np.random.rand(N, N)-0.5)*maxPhase
     Fout.field *= _np.exp(1j * ranphase)
