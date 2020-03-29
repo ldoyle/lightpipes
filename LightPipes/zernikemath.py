@@ -47,7 +47,7 @@ def zernike(n,m,rho,phi):
     if m>=0:
         return summ*_np.cos(m*phi)
     else:
-        return summ*_np.sin(m*phi)
+        return (-1)*summ*_np.sin(m*phi)
 
 
 
