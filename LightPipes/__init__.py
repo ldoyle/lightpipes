@@ -1,56 +1,5 @@
 # fix: https://github.com/matthew-brett/delocate/issues/15
 
-__all__ = [
-    'Axicon',
-    'BeamMix',
-    'Begin',
-    'CircAperture',
-    'CircScreen',
-    'Convert',
-    'Forward',
-    'Forvard',
-    'Fresnel',
-    'Gain',
-    'GaussAperture',
-    'GaussScreen',
-    'GaussHermite',
-    'GaussLaguerre',
-    'IntAttenuator',
-    'Intensity',
-    'Interpol',
-    'Lens',
-    'LensForvard',
-    'LensFresnel',
-    'MultIntensity',
-    'MultPhase',
-    'Normal',
-    'Phase',
-    'PhaseUnwrap',
-    'PipFFT',
-    'Power',
-    'RandomIntensity',
-    'RandomPhase',
-    'RectAperture',
-    'RectScreen',
-    'Steps',
-    'Strehl',
-    'SubIntensity',
-    'SubPhase',
-    'Tilt',
-    'Zernike',
-    'noll_to_zern',
-    'ZernikeName',
-    'getGridSize',
-    'setGridSize',
-    'getWavelength',
-    'setWavelength',
-    'getGridDimension',
-    'LPtest',
-    'LPhelp',
-    'GaussBeam',
-    'PointSource',
-    'LPdemo',
-]
 
 import functools
 import numpy as np
@@ -58,25 +7,25 @@ import webbrowser
 
 from .field import Field
 
-from ._LightPipes import Init # noqa
+from ._LightPipes import Init
 from ._version import __version__
 
 LPversion=__version__
 
 _LP = Init() # noqa
-# for name in __all__:
-#     locals()[name] = getattr(LP, name)
 
+#physical units like m, mm, rad, deg, ...
 from .units import * # noqa
 
-__all__.extend([
-    'm', 'cm', 'mm', 'um', 'nm',
-    'rad', 'mrad', 'W', 'mW', 'LPversion',
-])
-
-# avoid modified
-__all__ = tuple(__all__)
-
+from .propagators import Fresnel
+from .lenses import LensFarfield
+from .zernike import ZernikeName, ZernikeNolltoMN, noll_to_zern, \
+    ZernikeFilter, ZernikeFit, Zernike
+from .core import CircAperture, CircScreen
+from .core import Intensity, Phase, PhaseUnwrap
+from .core import RandomIntensity, RandomPhase
+from .core import Strehl
+from .core import SubIntensity, SubPhase
 
 def _apply_vals_to_LP(Fin):
     """Apply the values stored in Field to LP instance.
@@ -210,53 +159,6 @@ def Begin(size,labda,N):
     _apply_vals_to_LP(Fout) #apply global params to keep consistency
     return Fout
 
-@accept_new_field
-def CircAperture(R, x_shift, y_shift, Fin):
-    """
-    Fout = CircAperture(R, x_shift, y_shift, Fin)
-    
-    :ref:`Propagates the field through a circular aperture. <CircAperture>`
-
-    Args::
-    
-        R: radius of the aperture
-        x_shift, y_shift: shift from the center
-        Fin: input field
-        
-    Returns::
-     
-        Fout: output field (N x N square array of complex numbers).
-            
-    Example:
-    
-    :ref:`Diffraction from a circular aperture <circ_aperture>`
-    
-    """
-    return _LP.CircAperture(R, x_shift, y_shift, Fin)
-
-@accept_new_field
-def CircScreen(R, x_shift, y_shift, Fin):
-    """
-    Fout = CircScreen(R, x_shift, y_shift, Fin)
-                
-    :ref:`Diffracts the field by a circular screen. <CircScreen>`
-
-    Args::
-    
-        R: radius of the screen
-        x_shift, y_shift: shift from the center
-        Fin: input field
-        
-    Returns::
-     
-        Fout: output field (N x N square array of complex numbers).
-            
-    Example:
-    
-    :ref:`Spot of Poisson <Poisson>`
-    
-    """
-    return _LP.CircScreen(R, x_shift, y_shift, Fin)
 
 @accept_new_field
 def Convert(Fin):
@@ -325,29 +227,6 @@ def Forvard(z, Fin):
     
     """
     return _LP.Forvard(z, Fin)
-
-@accept_new_field
-def Fresnel(z, Fin):
-    """
-    Fout = Fresnel(z, Fin)
-
-    :ref:`Propagates the field using a convolution method. <Fresnel>`
-
-    Args::
-    
-        z: propagation distance
-        Fin: input field
-        
-    Returns::
-     
-        Fout: output field (N x N square array of complex numbers).
-            
-    Example:
-    
-    :ref:`Two holes interferometer <Young>`
-
-    """
-    return _LP.Fresnel(z, Fin) 
 
 @accept_new_field 
 def Gain(Isat, alpha0, Lgain, Fin):
@@ -514,28 +393,6 @@ def IntAttenuator(att, Fin):
     """    
     return _LP.IntAttenuator( att, Fin)
 
-def Intensity(flag,Fin):
-    """
-    I=Intensity(flag,Fin)
-    
-    :ref:`Calculates the intensity of the field. <Intensity>`
-    
-    :math:`I(x,y)=F_{in}(x,y).F_{in}(x,y)^*`
-    
-    Args::
-    
-        flag: 0= no normalization, 1=normalized to 1, 2=normalized to 255 (for bitmaps)
-        Fin: input field
-        
-    Returns::
-    
-        I: intensity distribution (N x N square array of doubles)
-
-    """
-    ll_in = Fin.field.tolist()
-    _apply_vals_to_LP(Fin) #important to set N in LP
-    return np.asarray(_LP.Intensity(flag, ll_in))
-
 @accept_new_field            
 def Interpol(new_size, new_number, x_shift, y_shift, angle, magnif, Fin):
     """
@@ -686,47 +543,6 @@ def Normal(Fin):
     """
     return _LP.Normal(Fin)
 
-def Phase(Fin):
-    """
-    Phi=Phase(Fin)
-    
-    :ref:`Calculates the phase of the field. <Phase>`
-    
-    
-    Args::
-    
-        Fin: input field
-        
-    Returns::
-    
-        Phi: phase distribution (N x N square array of doubles)
-
-    """
-    ll_in = Fin.field.tolist()
-    _apply_vals_to_LP(Fin) #important to set N in LP
-    return np.asarray(_LP.Phase(ll_in))
-
-def PhaseUnwrap(Phi):
-    """
-    PhiOut=PhaseUnwrap(PhiIn)
-    
-    :ref:`Unwraps (removes jumps of pi radians) the phase. <PhaseUnwrap>`
-    
-    
-    Args::
-    
-        PhiIn: input phase distribution
-        
-    Returns::
-    
-        PhiOut: unwrapped phase distribution (N x N square array of doubles)
-
-    """
-    ll_in = Phi.tolist()
-    N = Phi.shape[0]
-    _LP.internal_setN(N) #important, needs to be set correctly in LP
-    return np.asarray(_LP.PhaseUnwrap(ll_in))
-
 @accept_new_field
 def PipFFT(index, Fin):
     """
@@ -763,47 +579,7 @@ def Power(Fin):
     """
     ll_in = Fin.field.tolist()
     _apply_vals_to_LP(Fin) #important to set N in LP
-    return _LP.Power(ll_in)
-
-@accept_new_field
-def RandomIntensity(seed, noise, Fin):
-    """
-    Fout = RandomIntensity(seed, noise, Fin)
-
-    :ref:`Adds random intensity to the field <RandomIntensity>`
-        
-    Args::
-        
-        seed: seed number for the random noise generator
-        noise: level of the noise
-        Fin: input field
-        
-    Returns::
-        
-        Fout: output field (N x N square array of complex numbers).
-  
-    """
-    return _LP.RandomIntensity(seed, noise, Fin)
-
-@accept_new_field
-def RandomPhase(seed, maxPhase, Fin):
-    """
-    Fout = RandomPhase(seed, maxPhase, Fin)
-
-    :ref:`Adds random phase to the field <RandomPhase>`
-        
-    Args::
-        
-        seed: seed number for the random noise generator
-        maxPhase: maximum phase in radians
-        Fin: input field
-        
-    Returns::
-        
-        Fout: output field (N x N square array of complex numbers).
-  
-    """
-    return _LP.RandomPhase(seed, maxPhase, Fin)      
+    return _LP.Power(ll_in) 
 
 @accept_new_field          
 def RectAperture(sx, sy, x_shift, y_shift, angle, Fin):
@@ -825,6 +601,7 @@ def RectAperture(sx, sy, x_shift, y_shift, angle, Fin):
         Fout: output field (N x N square array of complex numbers).
 
     """
+    #TODO angle=0 already done in Python, see .core, needs finishing
     return _LP.RectAperture(sx, sy, x_shift, y_shift, angle, Fin)
 
 @accept_new_field
@@ -846,7 +623,8 @@ def RectScreen(sx, sy, x_shift, y_shift, angle, Fin):
      
         Fout: output field (N x N square array of complex numbers).
 
-    """    
+    """
+    #TODO angle=0 already done in Python, see .core, needs finishing
     return _LP.RectScreen(sx, sy, x_shift, y_shift, angle, Fin)
 
 @accept_new_field
@@ -876,63 +654,6 @@ def Steps(z, nstep, refr, Fin):
     """
     return _LP.Steps(z, nstep, refr, Fin)
 
-def Strehl(Fin):
-    """
-    S = Strehl( Fin)
-
-    :ref:`Calculates the Strehl value of the field <Strehl>`
-        
-    Args::
-        
-        Fin: input field
-        
-    Returns::
-        
-        S: Strehl value (real number).
-  
-    """
-    _apply_vals_to_LP(Fin) #important to set N in LP
-    ll_in = Fin.field.tolist()
-    return _LP.Strehl(ll_in)
-
-@accept_new_field
-def SubIntensity(Intens, Fin):
-    """
-    Fout = SubIntensity(Intens, Fin)
-
-    :ref:`Substitutes  a given intensity distribution in the field with. <SubIntensity>`
-        
-    Args::
-        
-        Intens: N x N square array of real numbers
-        Fin: input field
-        
-    Returns::
-        
-        Fout: output field (N x N square array of complex numbers).
-  
-    """
-    return _LP.SubIntensity( Intens.tolist(), Fin)
-
-@accept_new_field
-def SubPhase(Phase, Fin):
-    """
-    Fout = SubPhase(Phase, Fin)
-
-    :ref:`Substitutes  a given phase distribution in the field with. <SubPhase>`
-        
-    Args::
-        
-        Phase: N x N square array of real numbers
-        Fin: input field
-        
-    Returns::
-        
-        Fout: output field (N x N square array of complex numbers).
-  
-    """
-    return _LP.SubPhase( Phase.tolist(), Fin)
-
 @accept_new_field
 def Tilt(tx, ty, Fin):
     """
@@ -952,118 +673,6 @@ def Tilt(tx, ty, Fin):
     """
     return _LP.Tilt( tx, ty, Fin)
 
-@accept_new_field
-def Zernike(n, m, R, A, Fin):
-    """
-    Fout = Zernike(n, m, R, A, Fin)
-
-    :ref:`Substitutes a Zernike aberration phase distribution in the field. <Zernike>`
-        
-        :math:`F_{out}(x,y)=e^{\\phi^m_n (x,y)}F_{in}(x,y)`
-        
-        with:
-        
-        :math:`\\phi^m_n(x,y)=-j \\frac{2 \\pi }{ \\lambda } Z^m_n {(\\rho (x,y) ,\\theta (x,y)) }`
-        
-        :math:`\\rho(x,y)=  \\sqrt{ \\frac{x^2+y^2}{R^2} }`
-        
-        :math:`\\theta (x,y)=atan \\big( \\frac{y}{x} \\big)`
-        
-        :math:`Z^m_n(\\rho , \\theta)=A \\sqrt{ \\frac{2(n+1)}{1+\\delta_{m0}} } V^m_n(\\rho)cos(m\\theta)`
-        
-        :math:`Z^{-m}_n(\\rho , \\theta)=A \\sqrt{ \\frac{2(n+1)}{1+\\delta_{m0}} }V^m_n(\\rho)sin(m\\theta)`
-        
-        :math:`V^m_n(\\rho)= \\sum_{s=0}^{ \\frac{n-m}{2} }  \\frac{(-1)^s(n-s)!}{s!( \\frac{n+m}{2}-s)!( \\frac{n-m}{2}-s )! } \\rho^{n-2s}`
-        
-        :math:`\\delta_{m0}= \\begin{cases}1 & m = 0\\\\0 & m  \\neq  0\\end{cases}`
-        
-       
-    Args::
-    
-        n: radial order
-        m: azimuthal order, n-|m| must be even, |m|<=n
-        R: radius of the aberrated aperture
-        A: size of the aberration
-        Fin: input field
-        
-    Returns::
-      
-        Fout: ouput field (N x N square array of complex numbers).
-            
-    Example:
-    
-    :ref:`Zernike aberration <Zernike>`
-    
-    Reference: https://en.wikipedia.org/wiki/Zernike_polynomials
- 
-
-    """
-    return _LP.Zernike(n, m, R, A, Fin)
-
-def noll_to_zern(j):
-    """
-    Convert linear Noll index to tuple of Zernike indices.
-    j is the linear Noll coordinate, n is the radial Zernike index and m is the azimuthal Zernike index.
-    @param [in] j Zernike mode Noll index
-    @return (n, m) tuple of Zernike indices
-    @see <https://oeis.org/A176988>.
-    Thanks to: Tim van Werkhoven, https://github.com/tvwerkhoven
-    """
-
-    if (j == 0):
-        print("Noll indices start at 1, 0 is invalid.")
-        return (0,0)
-
-    n = 0
-    j1 = j-1
-    while (j1 > n):
-        n += 1
-        j1 -= n
-
-    m = (-1)**j * ((n % 2) + 2 * int((j1+((n+1)%2)) / 2.0 ))
-    return (n, m)
-
-def ZernikeNolltoMN(Noll):
-    MN = []
-    n = 0
-    while (Noll > n):
-        n += 1
-        Noll -= n
-    m = -n+2*Noll
-    MN=[m,n]
-    return MN
-
-def ZernikeName(Noll):
-    if (Noll >= 1 and Noll <= 21):
-        name = [
-            "piston",
-            "horizontal tilt",
-            "vertical tilt",
-            "defocus",
-            "oblique primary astigmatism",
-            "vertical primary astigmatism",
-            "vertical coma",
-            "horizontal coma",
-            "vertical trefoil",
-            "oblique trefoil",
-            "primary spherical",
-            "vertical secondary astigmatism",
-            "oblique secondary astigmatism",
-            "vertical quadrafoil",
-            "oblique quadrafoil",
-            "horizontal secondary coma",
-            "vertical secondary coma",
-            "oblique secondary trefoil",
-            "vertical secondary trefoil",
-            "oblique pentafoil",
-            "vertical pentafoil",
-        ]
-        return name[Noll-1]
-    elif Noll < 1:
-        print( "Error in ZernikeName(Noll): argument must be larger than 1")
-        return ""
-    else:
-        return ""
 
 def LPtest():
     """
@@ -1150,7 +759,8 @@ def setGridSize(newSize):
         -
 
     """
-    _LP.setGridSize(newSize)
+    # _LP.setGridSize(newSize)
+    raise NotImplementedError('Deprecated! use Field.size on object, not lib.')
 
 def getWavelength():
     """
@@ -1184,7 +794,8 @@ def setWavelength(newWavelength):
         -
 
     """ 
-    _LP.setWavelength(newWavelength)
+    # _LP.setWavelength(newWavelength)
+    raise NotImplementedError('Deprecated! use Field.lam on object, not lib.')
 
 def getGridDimension():
     """
