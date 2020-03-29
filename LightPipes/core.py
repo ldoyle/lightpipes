@@ -10,6 +10,32 @@ if USE_SCIPY:
 from .field import Field
 from .unwrap import phaseunwrap
 
+
+def BeamMix(Fin1, Fin2):
+    """
+    Fout = BeamMix(F1, F2)
+
+    :ref:`Addition of the fields F1 and F2. <BeamMix>`
+
+    Args::
+    
+        F1, F2: input fields
+        
+    Returns::
+      
+        Fout: output field (N x N square array of complex numbers).
+        
+    Example:
+    
+    :ref:`Two holes interferometer <Young>`
+    
+    """
+    if Fin1.field.shape != Fin2.field.shape:
+        raise ValueError('Field sizes do not match')
+    Fout = Field.copy(Fin1)
+    Fout.field += Fin2.field
+    return Fout
+
 def CircAperture(R, x_shift, y_shift, Fin):
     """
     Fout = CircAperture(R, x_shift, y_shift, Fin)
@@ -109,6 +135,52 @@ def Intensity(flag, Fin):
             I = I*255
     return I
 
+
+def MultIntensity(Intens, Fin):
+    """
+    Fout = MultIntensity(Intens, Fin)
+
+    :ref:`Multiplies the field with a given intensity distribution. <MultIntensity>`
+        
+    Args::
+        
+        Intens: N x N square array of real numbers
+        Fin: input field
+        
+    Returns::
+        
+        Fout: output field (N x N square array of complex numbers).
+  
+    """
+    if Intens.shape != Fin.field.shape:
+        raise ValueError('Intensity pattern shape does not match field size')
+    Fout = Field.copy(Fin)
+    Efield = _np.sqrt(Intens)
+    Fout.field *= Efield
+    return Fout
+
+
+def MultPhase(Phi, Fin):
+    """
+    Fout = MultPhase(Phase, Fin)
+
+    :ref:`Multiplies the field with a given phase distribution. <MultPhase>`
+        
+    Args::
+        
+        Phase: N x N square array of real numbers
+        Fin: input field
+        
+    Returns::
+        
+        Fout: output field (N x N square array of complex numbers).
+  
+    """
+    if Phi.shape != Fin.field.shape:
+        raise ValueError('Phase pattern shape does not match field size')
+    Fout = Field.copy(Fin)
+    Fout.field *= _np.exp(1j*Phi)
+    return Fout
 
 
 def Phase(Fin, unwrap = False, units='rad', blank_eps=0):

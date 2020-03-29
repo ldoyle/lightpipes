@@ -85,6 +85,8 @@ from .core import Intensity, Phase, PhaseUnwrap
 from .core import RandomIntensity, RandomPhase
 from .core import Strehl
 from .core import SubIntensity, SubPhase
+from .core import BeamMix
+from .core import MultIntensity, MultPhase
 
 def _apply_vals_to_LP(Fin):
     """Apply the values stored in Field to LP instance.
@@ -160,38 +162,6 @@ def Axicon(phi, n1, x_shift, y_shift, Fin):
 
     """
     return _LP.Axicon(phi, n1, x_shift, y_shift, Fin)
-
-
-def BeamMix(Fin1, Fin2):
-    """
-    Fout = BeamMix(F1, F2)
-
-    :ref:`Addition of the fields F1 and F2. <BeamMix>`
-
-    Args::
-    
-        F1, F2: input fields
-        
-    Returns::
-      
-        Fout: output field (N x N square array of complex numbers).
-        
-    Example:
-    
-    :ref:`Two holes interferometer <Young>`
-    
-    """
-    if Fin1.field.shape != Fin2.field.shape:
-        raise ValueError('Field sizes do not match')
-    Fout = Field.copy(Fin1)
-    ll_in1 = Fout.field.T.tolist() #transpose see @accept_new_field code
-    ll_in2 = Fin2.field.T.tolist()
-    _apply_vals_to_LP(Fout)
-    ll_out = _LP.BeamMix(ll_in1, ll_in2)
-    Fout.field = np.asarray(ll_out).T
-    _field_vals_from_LP(Fout)
-    
-    return Fout
 
 def Begin(size,labda,N):
     """
@@ -546,44 +516,6 @@ def LensFresnel(f, z, Fin):
         
     """
     return _LP.LensFresnel(f, z, Fin)
-
-@accept_new_field
-def MultIntensity(Intens, Fin):
-    """
-    Fout = MultIntensity(Intens, Fin)
-
-    :ref:`Multiplies the field with a given intensity distribution. <MultIntensity>`
-        
-    Args::
-        
-        Intens: N x N square array of real numbers
-        Fin: input field
-        
-    Returns::
-        
-        Fout: output field (N x N square array of complex numbers).
-  
-    """
-    return _LP.MultIntensity( Intens, Fin)
-
-@accept_new_field
-def MultPhase(Phi, Fin):
-    """
-    Fout = MultPhase(Phase, Fin)
-
-    :ref:`Multiplies the field with a given phase distribution. <MultPhase>`
-        
-    Args::
-        
-        Phase: N x N square array of real numbers
-        Fin: input field
-        
-    Returns::
-        
-        Fout: output field (N x N square array of complex numbers).
-  
-    """
-    return _LP.MultPhase( Phi, Fin)
 
 @accept_new_field
 def Normal(Fin):
