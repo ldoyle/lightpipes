@@ -149,10 +149,7 @@ class Field:
         pixel in the field (matching legacy LP convention)."""
         Y, X = self.mgrid_cartesian
         r = _np.sqrt(X**2+Y**2)
-        # phi = _np.arctan2(Y, X) + _np.pi #TODO this is ported from Cpp
-        phi = _np.arctan2(Y, X) + _np.pi/2 #however this matches results
-        # -> something is slightly going wrong somewhere in the definition
-        # of e.g. the azimuthal angle or coord axes
+        phi = _np.arctan2(Y, X) + _np.pi
         return (r, phi)
 
 
