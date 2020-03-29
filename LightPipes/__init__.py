@@ -1,22 +1,81 @@
 # fix: https://github.com/matthew-brett/delocate/issues/15
 
+__all__ = [
+    'Axicon',
+    'BeamMix',
+    'Begin',
+    'CircAperture',
+    'CircScreen',
+    'Convert',
+    'Forward',
+    'Forvard',
+    'Fresnel',
+    'Gain',
+    'GaussAperture',
+    'GaussScreen',
+    'GaussHermite',
+    'GaussLaguerre',
+    'IntAttenuator',
+    'Intensity',
+    'Interpol',
+    'Lens',
+    'LensForvard',
+    'LensFresnel',
+    'MultIntensity',
+    'MultPhase',
+    'Normal',
+    'Phase',
+    'PhaseUnwrap',
+    'PipFFT',
+    'Power',
+    'RandomIntensity',
+    'RandomPhase',
+    'RectAperture',
+    'RectScreen',
+    'Steps',
+    'Strehl',
+    'SubIntensity',
+    'SubPhase',
+    'Tilt',
+    'Zernike',
+    'noll_to_zern',
+    'ZernikeName',
+    'ZernikeFit',
+    'ZernikeFilter',
+    'getGridSize',
+    'setGridSize',
+    'getWavelength',
+    'setWavelength',
+    'getGridDimension',
+    'LPtest',
+    'LPhelp',
+    'GaussBeam',
+    'PointSource',
+    'LPdemo',
+]
+
+#physical units like m, mm, rad, deg, ...
+from .units import * # noqa
+
+from ._version import __version__
+LPversion=__version__
+
+__all__.extend([
+    'm', 'cm', 'mm', 'um', 'nm',
+    'rad', 'mrad', 'urad', 'deg', 'W', 'mW', 'LPversion',
+])
+
+# avoid modified
+__all__ = tuple(__all__)
 
 import functools
 import numpy as np
 import webbrowser
 
-from .field import Field
-
 from ._LightPipes import Init
-from ._version import __version__
-
-LPversion=__version__
-
 _LP = Init() # noqa
 
-#physical units like m, mm, rad, deg, ...
-from .units import * # noqa
-
+from .field import Field
 from .propagators import Fresnel
 from .lenses import LensFarfield
 from .zernike import ZernikeName, ZernikeNolltoMN, noll_to_zern, \
