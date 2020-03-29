@@ -39,6 +39,36 @@ def Axicon(phi, n1, x_shift, y_shift, Fin):
     return Fout
 
 
+def Lens(f, x_shift, y_shift, Fin):
+    """
+    Fout = Lens(f, x_shift, y_shift, Fin)
+
+    :ref:`Propagates the field through an ideal, thin lens. <Lens>`
+
+    It adds a phase given by:
+    :math:`F_{out}(x,y)=e^{-j\\frac{2\\pi}{\\lambda}\\left(\\frac{(x-x_{shift})^2+(y-y_{shift})^2}{2f}\\right)}F_{in}(x,y)`
+        
+    Args::
+    
+        f: focal length
+        x_shift, y_shift: shift from center
+        Fin: input field
+        
+    Returns::
+    
+        Fout: output field (N x N square array of complex numbers).
+
+    """
+    Fout = Field.copy(Fin)
+    k = 2*_np.pi/Fout.lam
+    yy, xx = Fout.mgrid_cartesian
+    xx -= x_shift
+    yy -= y_shift
+    fi = -k*(xx**2+yy**2)/(2*f)
+    Fout.field *= _np.exp(1j * fi)
+    return Fout
+
+
 def LensFarfield(f, Fin):
     """
     Use a direct FFT approach to calculate the far field of the input field.

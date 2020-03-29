@@ -77,7 +77,7 @@ _LP = Init() # noqa
 
 from .field import Field
 from .propagators import Fresnel
-from .lenses import Axicon, LensFarfield
+from .lenses import Axicon, Lens, LensFarfield
 from .zernike import ZernikeName, ZernikeNolltoMN, noll_to_zern, \
     ZernikeFilter, ZernikeFit, Zernike
 from .core import CircAperture, CircScreen, RectAperture, RectScreen
@@ -401,30 +401,8 @@ def Interpol(new_size, new_number, x_shift, y_shift, angle, magnif, Fin):
         Fout: output field (Nnew x Nnew square array of complex numbers).
   
     """
-    return _LP.Interpol(new_size, new_number, x_shift, y_shift, angle, magnif, Fin)                        
+    return _LP.Interpol(new_size, new_number, x_shift, y_shift, angle, magnif, Fin)
 
-@accept_new_field
-def Lens(f, x_shift, y_shift, Fin):
-    """
-    Fout = Lens(f, x_shift, y_shift, Fin)
-
-    :ref:`Propagates the field through an ideal, thin lens. <Lens>`
-
-    It adds a phase given by:
-    :math:`F_{out}(x,y)=e^{-j\\frac{2\\pi}{\\lambda}\\left(\\frac{(x-x_{shift})^2+(y-y_{shift})^2}{2f}\\right)}F_{in}(x,y)`
-        
-    Args::
-    
-        f: focal length
-        x_shift, y_shift: shift from center
-        Fin: input field
-        
-    Returns::
-    
-        Fout: output field (N x N square array of complex numbers).
-
-    """
-    return _LP.Lens(f, x_shift, y_shift, Fin)
 
 @accept_new_field
 def LensForvard(f, z, Fin):
