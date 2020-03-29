@@ -89,6 +89,7 @@ from .core import BeamMix
 from .core import MultIntensity, MultPhase
 from .core import Normal, Power
 from .core import IntAttenuator
+from .misc import Tilt
 
 def _apply_vals_to_LP(Fin):
     """Apply the values stored in Field to LP instance.
@@ -499,25 +500,6 @@ def Steps(z, nstep, refr, Fin):
     
     """
     return _LP.Steps(z, nstep, refr, Fin)
-
-@accept_new_field
-def Tilt(tx, ty, Fin):
-    """
-    Fout = Tilt(tx, ty, Fin)
-
-    :ref:`Tilts the field. <Tilt>`
-
-    Args::
-    
-        tx, ty: tilt in radians
-        Fin: input field
-        
-    Returns::
-    
-        Fout: output field (N x N square array of complex numbers).
-
-    """
-    return _LP.Tilt( tx, ty, Fin)
 
 
 def LPtest():
