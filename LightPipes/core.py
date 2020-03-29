@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import numpy as _np
-from skimage.restoration import unwrap_phase as _unwrap_phase
+
+USE_SCIPY=False
+if USE_SCIPY:
+    from skimage.restoration import unwrap_phase as _unwrap_phase
+    #used in PhaseUnwrap, or using own implementation in .unwrap
 
 from .field import Field
 from .unwrap import phaseunwrap
@@ -168,8 +172,7 @@ def PhaseUnwrap(Phi):
         PhiOut: unwrapped phase distribution (N x N square array of doubles)
 
     """
-    use_scipy=False
-    if use_scipy:
+    if USE_SCIPY:
         PhiU = _unwrap_phase(Phi)
     else:
         PhiU = phaseunwrap(Phi)
