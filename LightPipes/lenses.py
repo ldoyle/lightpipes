@@ -4,6 +4,41 @@ import numpy as _np
 
 from .field import Field
 
+
+def Axicon(phi, n1, x_shift, y_shift, Fin):
+    """
+    Fout = Axicon(phi, n1, x_shift, y_shift, Fin)
+   
+    :ref:`Propagates the field through an axicon. <Axicon>`
+
+    Args::
+    
+        phi: top angle of the axicon in radians
+        n1: refractive index of the axicon material
+        x_shift, y_shift: shift from the center
+        Fin: input field
+        
+    Returns::
+      
+        Fout: output field (N x N square array of complex numbers).
+            
+    Example:
+    
+    :ref:`Bessel beam with axicon <BesselBeam>`
+
+    """
+    Fout = Field.copy(Fin)
+    k = 2*_np.pi/Fout.lam
+    theta = _np.arcsin(n1*_np.cos(phi/2)+phi/2-_np.pi/2)
+    Ktheta = k * theta
+    yy, xx = Fout.mgrid_cartesian
+    xx -= x_shift
+    yy -= y_shift
+    fi = -Ktheta*_np.sqrt(xx**2+yy**2)
+    Fout.field *= _np.exp(1j*fi)
+    return Fout
+
+
 def LensFarfield(f, Fin):
     """
     Use a direct FFT approach to calculate the far field of the input field.

@@ -77,7 +77,7 @@ _LP = Init() # noqa
 
 from .field import Field
 from .propagators import Fresnel
-from .lenses import LensFarfield
+from .lenses import Axicon, LensFarfield
 from .zernike import ZernikeName, ZernikeNolltoMN, noll_to_zern, \
     ZernikeFilter, ZernikeFit, Zernike
 from .core import CircAperture, CircScreen, RectAperture, RectScreen
@@ -139,31 +139,6 @@ def accept_new_field(fn):
     
     return fn_wrapper
         
-
-@accept_new_field
-def Axicon(phi, n1, x_shift, y_shift, Fin):
-    """
-    Fout = Axicon(phi, n1, x_shift, y_shift, Fin)
-   
-    :ref:`Propagates the field through an axicon. <Axicon>`
-
-    Args::
-    
-        phi: top angle of the axicon in radians
-        n1: refractive index of the axicon material
-        x_shift, y_shift: shift from the center
-        Fin: input field
-        
-    Returns::
-      
-        Fout: output field (N x N square array of complex numbers).
-            
-    Example:
-    
-    :ref:`Bessel beam with axicon <BesselBeam>`
-
-    """
-    return _LP.Axicon(phi, n1, x_shift, y_shift, Fin)
 
 def Begin(size,labda,N):
     """
