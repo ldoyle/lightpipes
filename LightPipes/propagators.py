@@ -5,7 +5,7 @@ import numpy as _np
 from scipy.special import fresnel as _fresnel
 
 from .field import Field
-
+from . import tictoc
 
 def Fresnel(z, Fin):
     """
@@ -27,7 +27,9 @@ def Fresnel(z, Fin):
     :ref:`Two holes interferometer <Young>`
 
     """
+    # tictoc.tic()
     Fout = Field.copy(Fin)
+    # tictoc.printtoc(prefix='copy')
     Fout.field = _field_Fresnel(z, Fout.field, Fout.dx, Fout.lam)
     return Fout
 
@@ -65,7 +67,6 @@ def _field_Fresnel(z, field, dx, lam):
             more row/col to fill entire field. No errors noticed with the new
             method so far
     """
-    
     N = field.shape[0] #assert square
     
     kz = 2*_np.pi/lam*z
@@ -88,6 +89,7 @@ def _field_Fresnel(z, field, dx, lam):
         step involving Fresnel integral calc.
     """
     
+    # tictoc.tic()
     RR = _np.sqrt(1/(2*lam*z))*dx*2
     io = _np.arange(0, (2*No2)+1) #add one extra to stride fresnel integrals
     R1 = RR*(io - No2)
@@ -113,8 +115,9 @@ def _field_Fresnel(z, field, dx, lam):
                - fss[1:, :-1] # -sps
                - fcc[:-1, :-1] # -cc
                + fss[:-1, :-1])# +ss
+    # tictoc.printtoc(prefix='fresnel')
     
-    
+    # tictoc.tic()
     ii = _np.ones((2*No2),dtype=float)
     ii[1::2] = -1
     iiij = _np.outer(ii, ii)
@@ -128,7 +131,9 @@ def _field_Fresnel(z, field, dx, lam):
     in_outK = _np.fft.fft2(in_outK)
     in_outF = _np.fft.fft2(in_outF)
     
+    # tictoc.printtoc(prefix='fft 1: ')
     
+    # tictoc.tic()
     ii = _np.ones((2*N),dtype=float)
     ii[1::2] = -1
     sign_pattern = _np.outer(ii, ii)
@@ -138,9 +143,11 @@ def _field_Fresnel(z, field, dx, lam):
     cci = (in_outK.real * in_outF.imag
             + in_outF.real * in_outK.imag)
     in_outF[:,:] = sign_pattern * (cc + 1j * cci)
-    
+    # tictoc.printtoc(prefix='sign_pattern')
+    # tictoc.tic()
     in_outF = _np.fft.ifft2(in_outF)
-    
+    # tictoc.printtoc(prefix='fft 2: ')
+    # tictoc.tic()
     ii = _np.ones(N,dtype=float)
     ii[1::2] = -1
     iiij = _np.outer(ii, ii)
@@ -156,7 +163,7 @@ def _field_Fresnel(z, field, dx, lam):
     temp_im = 0.25*iiij*(FI * cokz + FR * sikz)
     
     field[:,:] = (temp_re + 1j * temp_im)
-
+    # tictoc.printtoc(prefix='field slice')
     return field
 
 
