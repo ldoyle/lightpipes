@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from .core import Phase, PhaseUnwrap, Intensity
+
+import numpy as _np
+
 from .units import *
+from .core import Phase, PhaseUnwrap, Intensity
 
 def Plot(F, unwrap = False, phaseblank =True, title='', circ_r=None, zoom=1):
     """
