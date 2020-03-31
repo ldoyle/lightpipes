@@ -57,6 +57,27 @@ class Field:
 
         """
         return _copy.deepcopy(Fin)
+        
+    @classmethod
+    def shallowcopy(cls, Fin):
+        """
+        Create a shallow copy of the input field, i.e. the parameters are
+        cloned but the reference to the numpy field is the same!
+        This may be useful if a function (e.g. Fresnel) returns a copied
+        field anyways, so a deep copy like Field.copy() would be redundant.
+
+        Parameters
+        ----------
+        Fin : Field
+            Input field to copy (common reference to .field!)
+
+        Returns
+        -------
+        A new Field object with identical values as Fin and common reference
+        to .field
+
+        """
+        return _copy.copy(Fin)
     
     def __init__(self, Fin=None, grid_size=1.0, wavelength=1.0, N=0):
         """Private, use class method factories instead."""
