@@ -43,12 +43,9 @@ def Fresnel(z, Fin):
     :ref:`Two holes interferometer <Young>`
 
     """
-    tictoc.tic()
     Fout = Field.shallowcopy(Fin) #no need to copy .field as it will be
     # re-created anyway inside _field_Fresnel()
-    tictoc.printtoc(prefix='copy')
-    with tictoc.printtimer('field_Fresnel'):
-        Fout.field = _field_Fresnel(z, Fout.field, Fout.dx, Fout.lam)
+    Fout.field = _field_Fresnel(z, Fout.field, Fout.dx, Fout.lam)
     return Fout
 
 
