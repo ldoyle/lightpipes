@@ -2,20 +2,25 @@
 
 """User can decide to disable dependency here. This will slow down the FFT,
 but otherwise numpy.fft is a drop-in replacement so far."""
-USE_PYFFTW = True
-if USE_PYFFTW:
+_USE_PYFFTW = True
+_using_pyfftw = False # determined if loading is successful
+if _USE_PYFFTW:
     try:
+        import pyfftw as _pyfftw
         from pyfftw.interfaces.numpy_fft import fft2 as _fft2
         from pyfftw.interfaces.numpy_fft import ifft2 as _ifft2
+        _fftargs = {'planner_effort':'FFTW_ESTIMATE',
+                    'overwrite_input':True,
+                    'threads':4} #negative means use N_cpus
+        _using_pyfftw = True
     except ImportError:
         import warnings
         warnings.warn('LightPipes: Cannot import pyfftw,'
                       + ' falling back to numpy.fft')
-        from numpy.fft import fft2 as _fft2
-        from numpy.fft import ifft2 as _ifft2
-else:
+if not _using_pyfftw:
     from numpy.fft import fft2 as _fft2
     from numpy.fft import ifft2 as _ifft2
+    _fftargs = {}
 
 import numpy as _np
 from scipy.special import fresnel as _fresnel
@@ -83,7 +88,7 @@ def _field_Fresnel(z, field, dx, lam):
             more row/col to fill entire field. No errors noticed with the new
             method so far
     ************************************************************* """
-    
+    tictoc.tic()
     N = field.shape[0] #assert square
     
     kz = 2*_np.pi/lam*z
@@ -102,9 +107,12 @@ def _field_Fresnel(z, field, dx, lam):
         field instead of the whole field. Necessary for symmetry of first
         step involving Fresnel integral calc.
     """
-
-    in_outF = _np.zeros((2*N, 2*N),dtype=complex)
-    in_outK = _np.zeros((2*N, 2*N),dtype=complex)
+    if _using_pyfftw:
+        in_outF = _pyfftw.zeros_aligned((2*N, 2*N),dtype=complex)
+        in_outK = _pyfftw.zeros_aligned((2*N, 2*N),dtype=complex)
+    else:
+        in_outF = _np.zeros((2*N, 2*N),dtype=complex)
+        in_outK = _np.zeros((2*N, 2*N),dtype=complex)
     
     """Our grid is zero-centered, i.e. the 0 coordiante (beam axis) is
     not at field[0,0], but field[No2, No2]. The FFT however is implemented
@@ -184,14 +192,18 @@ def _field_Fresnel(z, field, dx, lam):
     in_outF[(N-No2):(N+No2), (N-No2):(N+No2)] \
         = field[(N-2*No2):N,(N-2*No2):N] #cutting off field if N odd (!)
     in_outF[(N-No2):(N+No2), (N-No2):(N+No2)] *= iiij2No2
-
-    in_outK = _fft2(in_outK)
-    in_outF = _fft2(in_outF)
-
+    
+    tictoc.tic()
+    in_outK = _fft2(in_outK, **_fftargs)
+    in_outF = _fft2(in_outF, **_fftargs)
+    t_fft1 = tictoc.toc()
+    
     in_outF *= in_outK
     
     in_outF *= iiij2N
-    in_outF = _ifft2(in_outF)
+    tictoc.tic()
+    in_outF = _ifft2(in_outF, **_fftargs)
+    t_fft2 = tictoc.toc()
     #TODO check normalization if USE_PYFFTW
     
     Ftemp = (in_outF[No2:N+No2, No2:N+No2]
@@ -202,7 +214,11 @@ def _field_Fresnel(z, field, dx, lam):
     Ftemp *= 0.25 * comp
     Ftemp *= iiijN
     field = Ftemp #reassign without data copy
-            
+    ttotal = tictoc.toc()
+    t_fft = t_fft1 + t_fft2
+    t_outside = ttotal - t_fft
+    print('Time total = fft + rest: {:.2f}={:.2f}+{:.2f}'.format(
+        ttotal, t_fft, t_outside))
     return field
 
 
