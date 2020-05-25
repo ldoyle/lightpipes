@@ -24,8 +24,6 @@ if not _using_pyfftw:
 
 import numpy as _np
 from scipy.special import fresnel as _fresnel
-from scipy.optimize import least_squares #TODO hide from public
-from scipy.sparse import coo_matrix
 
 from .field import Field
 from . import tictoc
@@ -407,9 +405,9 @@ def Forvard(z, Fin):
     return Fout
 
 
-def Steps(z, nstep, refr, Fin, save_ram=False, use_scipy=False):
+def Steps(z, nstep, refr, Fin, save_ram=False):
     """
-    Fout = Steps(z, nstep, refr, Fin, save_ram=False, use_scipy=False)
+    Fout = Steps(z, nstep, refr, Fin, save_ram=False)
 
     :ref:`Propagates the field a distance, nstep x z, in nstep steps in a
     medium with a complex refractive index stored in the
@@ -422,7 +420,6 @@ def Steps(z, nstep, refr, Fin, save_ram=False, use_scipy=False):
         refr: refractive index (N x N array of complex numbers)
         Fin: input field
         save_ram: -
-        use_scipy: -
         
     Returns::
       
@@ -432,20 +429,16 @@ def Steps(z, nstep, refr, Fin, save_ram=False, use_scipy=False):
     
     :ref:`Propagation through a lens like medium <lenslikemedium>`
     """
-    if use_scipy:
-        print('Warning! Non-functional develop version for testing')
-        return _TODOStepsScipy(z, nstep, refr, Fin)
+    if save_ram:
+        """Loops version goes line by line and therefore only needs
+        1 field in RAM and several vectors of length N.
+        The other version also works line by line, but instead of looping
+        uses numpy syntax to operate on all lines simultaneously.
+        Thus, several arrays of size N^2 have to be stored simultaneously!
+        """
+        return _StepsLoopElim(z, nstep, refr, Fin)
     else:
-        if save_ram:
-            """Loops version goes line by line and therefore only needs
-            1 field in RAM and several vectors of length N.
-            The other version also works line by line, but instead of looping
-            uses numpy syntax to operate on all lines simultaneously.
-            Thus, several arrays of size N^2 have to be stored simultaneously!
-            """
-            return _StepsLoopElim(z, nstep, refr, Fin)
-        else:
-            return _StepsArrayElim(z, nstep, refr, Fin)
+        return _StepsArrayElim(z, nstep, refr, Fin)
 
 
 def _StepsArrayElim(z, nstep, refr, Fin):
@@ -872,135 +865,21 @@ def _StepsLoopElim(z, nstep, refr, Fin):
         i = int((N-2)/2)*2
         #TODO also, why 0:N-1 where all else is 0:N?
         Fout.field[0:N-1, i] = uu2[1:N]
-    """
-    ///* end j */
-    """
-    #TODO should this be in nstep loop??
-    # seems so, that would add up to 1*ikz*n, right now its 3/4*ikz per iter
-    # and a final 1/4 ??
-    Fout.field *= expfi4 #*=_np.exp(1j*(0.25*K*dz*(refr.real-1.0)))
-    return Fout
-
-
-def _TODOStepsScipy(z, nstep, refr, Fin):
-    """Right now this is just a test and collection of code from
-    https://scipy-cookbook.readthedocs.io/items/discrete_bvp.html
-    which is not functional for Lightpipes!
-    Also, its really really slow, so possibly not useful at all.
-    """
-    """
-    Fout = Steps(z, nstep, refr, Fin)
-                 
-    :ref:`Propagates the field a distance, nstep x z, in nstep steps in a
-    medium with a complex refractive index stored in the
-    square array refr. <Steps>`
-
-    Args::
-    
-        z: propagation distance per step
-        nstep: number of steps
-        refr: refractive index (N x N array of complex numbers)
-        Fin: input field
-        
-    Returns::
-      
-        Fout: ouput field (N x N square array of complex numbers).
-        
-    Example:
-    
-    :ref:`Propagation through a lens like medium <lenslikemedium>`
-    
-    """
-    if Fin._curvature != 0.0:
-        raise ValueError('Cannot operate on spherical coords.'
-                         + 'Use Convert() first')
-    Fout = Field.copy(Fin)
-    N = Fout.N
-    lam = Fout.lam
-    size = Fout.siz
-    
-    
-    legacy = True
+        """
+        ///* end j */
+        """
+        legacy = False #TODO debug only, should be set at top of function
+        if not legacy:
+            Fout.field *= expfi4 #*=_np.exp(1j*(0.25*K*dz*(refr.real-1.0)))
+    # end of loop
     if legacy:
-        Pi = 3.141592654 #to compare Cpp results accurately
-    else:
-        Pi = _np.pi
-    K = 2.*Pi/lam
-    z = z/2.
-    Pi4lz = 4.*Pi/lam/z
-    imPi4lz = 1j * Pi4lz
-    
-    delta = size/(N-1.) #dx
-    delta2 = delta*delta
-    
-    n = 100
-    c = 1
-    # n = N
-    # c = delta**2
-    def f(u, ):
-        return u**3
-    
-    def f_prime(u):
-        return 3 * u**2
-    
-    def fun(u, n, f, f_prime, c, **kwargs):
-        v = _np.zeros((n + 2, n + 2))
-        u = u.reshape((n, n))
-        v[1:-1, 1:-1] = u
-        y = v[:-2, 1:-1] + v[2:, 1:-1] + v[1:-1, :-2] + v[1:-1, 2:] - 4 * u + c * f(u)
-        return y.ravel()
-
-    def compute_jac_indices(n):
-        i = _np.arange(n)
-        jj, ii = _np.meshgrid(i, i)
-    
-        ii = ii.ravel()
-        jj = jj.ravel()
-    
-        ij = _np.arange(n**2)
-    
-        jac_rows = [ij]
-        jac_cols = [ij]
-    
-        mask = ii > 0
-        ij_mask = ij[mask]
-        jac_rows.append(ij_mask)
-        jac_cols.append(ij_mask - n)
-    
-        mask = ii < n - 1
-        ij_mask = ij[mask]
-        jac_rows.append(ij_mask)
-        jac_cols.append(ij_mask + n)
-    
-        mask = jj > 0
-        ij_mask = ij[mask]
-        jac_rows.append(ij_mask)
-        jac_cols.append(ij_mask - 1)
-    
-        mask = jj < n - 1
-        ij_mask = ij[mask]
-        jac_rows.append(ij_mask)
-        jac_cols.append(ij_mask + 1)
-    
-        return _np.hstack(jac_rows), _np.hstack(jac_cols)
-    jac_rows, jac_cols = compute_jac_indices(N)
-    # u0 = np.ones(n**2) * 0.5
-    u0 = Fin.field.ravel() #initial guess is old field
-    
-    def jac(u, n, f, f_prime, c, jac_rows=None, jac_cols=None):
-        jac_values = _np.ones_like(jac_cols, dtype=float)
-        jac_values[:n**2] = -4 + c * f_prime(u)
-        return coo_matrix((jac_values, (jac_rows, jac_cols)),
-                          shape=(n**2, n**2))
-    
-    res_1 = least_squares(fun, u0.real, jac=jac, gtol=1e-3,
-                          args=(N, f, f_prime, c),
-                          kwargs={'jac_rows': jac_rows,
-                                  'jac_cols': jac_cols},
-                          verbose=0)
-    # print(res_1)
-    Fout.field = res_1.x.reshape((N, N))
+        #TODO should this be in nstep loop??
+        # seems so, that would add up to 1*ikz*n, right now its 3/4*ikz per iter
+        # and a final 1/4 ??
+        Fout.field *= expfi4 #*=_np.exp(1j*(0.25*K*dz*(refr.real-1.0)))
     return Fout
+
+
 
 
 
